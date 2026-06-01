@@ -12,6 +12,10 @@ final class CameraSessionManager: NSObject {
 
     private(set) var position: AVCaptureDevice.Position = .front
     private(set) var formatDescription: String = "Configuring…"
+
+    func reportStatus(_ message: String) {
+        formatDescription = message
+    }
     private(set) var videoDimensions: CMVideoDimensions = CMVideoDimensions(width: 1920, height: 1080)
 
     var isRecording = false

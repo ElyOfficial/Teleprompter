@@ -160,7 +160,13 @@ struct TeleprompterView: View {
                 Text("Speed")
                     .font(.caption)
                     .foregroundStyle(AppTheme.secondaryText)
-                Slider(value: $settings.scrollSpeed, in: 10...120)
+                Slider(
+                    value: Binding(
+                        get: { settings.scrollSpeed },
+                        set: { settings.scrollSpeed = $0 }
+                    ),
+                    in: 10...120
+                )
                 .tint(AppTheme.accent)
                 .padding(.horizontal, 32)
             }

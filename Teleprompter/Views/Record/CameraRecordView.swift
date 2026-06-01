@@ -204,7 +204,7 @@ final class CameraRecordViewModel {
             try await camera.configure(preset: settings.videoQuality, fps: settings.videoFps)
             camera.start()
         } catch {
-            camera.formatDescription = "Camera error"
+            camera.reportStatus("Camera error")
         }
     }
 
@@ -232,7 +232,7 @@ final class CameraRecordViewModel {
             wireCallbacks(settings: settings)
             camera.start()
         } catch {
-            camera.formatDescription = "Camera error"
+            camera.reportStatus("Camera error")
         }
     }
 
@@ -284,7 +284,7 @@ final class CameraRecordViewModel {
             isRecording = true
             wireCallbacks(settings: settings)
         } catch {
-            camera.formatDescription = "Record failed"
+            camera.reportStatus("Record failed")
         }
     }
 
