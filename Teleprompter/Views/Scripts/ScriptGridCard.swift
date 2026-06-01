@@ -43,7 +43,7 @@ struct ScriptGridCard: View {
                 .lineLimit(1)
         }
         .fullScreenCover(isPresented: $showPlayer) {
-            TeleprompterView(script: script)
+            CameraRecordView(script: script)
         }
     }
 }

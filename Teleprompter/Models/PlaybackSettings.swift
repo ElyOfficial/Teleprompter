@@ -32,6 +32,24 @@ final class PlaybackSettings {
         didSet { UserDefaults.standard.set(backgroundColorHex, forKey: Keys.backgroundColorHex) }
     }
 
+    var videoQualityRaw: String {
+        didSet { UserDefaults.standard.set(videoQualityRaw, forKey: Keys.videoQuality) }
+    }
+    var videoFps: Int {
+        didSet { UserDefaults.standard.set(videoFps, forKey: Keys.videoFps) }
+    }
+    var prompterWidthFraction: Double {
+        didSet { UserDefaults.standard.set(prompterWidthFraction, forKey: Keys.prompterWidth) }
+    }
+    var fontScale: Double {
+        didSet { UserDefaults.standard.set(fontScale, forKey: Keys.fontScale) }
+    }
+
+    var videoQuality: VideoQualityPreset {
+        get { VideoQualityPreset(rawValue: videoQualityRaw) ?? .hd1080 }
+        set { videoQualityRaw = newValue.rawValue }
+    }
+
     var textColor: Color {
         get { Color(hex: textColorHex) ?? .white }
         set { textColorHex = newValue.toHex() ?? "FFFFFFFF" }
@@ -53,6 +71,10 @@ final class PlaybackSettings {
         readingLineGuide = d.object(forKey: Keys.readingLineGuide) as? Bool ?? true
         textColorHex = d.string(forKey: Keys.textColorHex) ?? "FFFFFFFF"
         backgroundColorHex = d.string(forKey: Keys.backgroundColorHex) ?? "FF000000"
+        videoQualityRaw = d.string(forKey: Keys.videoQuality) ?? VideoQualityPreset.hd1080.rawValue
+        videoFps = d.object(forKey: Keys.videoFps) as? Int ?? 30
+        prompterWidthFraction = d.object(forKey: Keys.prompterWidth) as? Double ?? 0.92
+        fontScale = d.object(forKey: Keys.fontScale) as? Double ?? 1.0
     }
 
     private enum Keys {
@@ -65,6 +87,10 @@ final class PlaybackSettings {
         static let readingLineGuide = "readingLineGuide"
         static let textColorHex = "textColorHex"
         static let backgroundColorHex = "backgroundColorHex"
+        static let videoQuality = "videoQuality"
+        static let videoFps = "videoFps"
+        static let prompterWidth = "prompterWidthFraction"
+        static let fontScale = "fontScale"
     }
 }
 

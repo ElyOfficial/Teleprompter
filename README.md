@@ -7,12 +7,18 @@ A simple iPhone teleprompter for your own scripts — no subscriptions, ads, or 
 - **Xcode 15+** from the Mac App Store (Command Line Tools alone cannot build iOS apps)
 - iPhone on iOS 17+ (or run in Simulator)
 
-## Install on iPhone (no Xcode)
+## Best quality — native app (recommended)
 
-**Fastest:** open **https://elyofficial.github.io/Teleprompter/** in Safari → **Share → Add to Home Screen**.  
-Full steps: [INSTALL-IPHONE.md](INSTALL-IPHONE.md)
+Open `Teleprompter.xcodeproj` in **Xcode**, run on your iPhone. Uses **AVFoundation** for maximum camera quality (720p / 1080p / 4K, 24–60 fps).
 
-## Open and run (native Swift app)
+Full guide: **[NATIVE-INSTALL.md](NATIVE-INSTALL.md)** (direct install or **TestFlight** — no App Store required).
+
+## Web app (quick, lower camera quality)
+
+**https://elyofficial.github.io/Teleprompter/** in Safari → Add to Home Screen.  
+See [INSTALL-IPHONE.md](INSTALL-IPHONE.md).
+
+## Open in Xcode
 
 1. Open `Teleprompter.xcodeproj` in Xcode.
 2. Select your iPhone or a Simulator.

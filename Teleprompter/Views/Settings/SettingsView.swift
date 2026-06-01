@@ -20,6 +20,25 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Picker("Quality", selection: Binding(
+                        get: { settings.videoQuality },
+                        set: { settings.videoQuality = $0 }
+                    )) {
+                        ForEach(VideoQualityPreset.allCases) { q in
+                            Text(q.displayName).tag(q)
+                        }
+                    }
+                    Picker("Frame rate", selection: $settings.videoFps) {
+                        ForEach(VideoFrameRate.allCases) { f in
+                            Text(f.label).tag(f.rawValue)
+                        }
+                    }
+                } header: {
+                    sectionHeader("CAMERA (NATIVE)")
+                }
+                .listRowBackground(AppTheme.card)
+
+                Section {
                     labeledSlider("Scroll speed", value: $settings.scrollSpeed, range: 10...120, step: 1)
                     Stepper("Countdown: \(settings.countdownSeconds)s", value: $settings.countdownSeconds, in: 0...10)
                     Toggle("Reading line guide", isOn: $settings.readingLineGuide)

@@ -20,6 +20,13 @@
 		B1000001000000000000000B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000001000000000000000B /* SettingsView.swift */; };
 		B1000001000000000000000C /* VisualTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000001000000000000000C /* VisualTimerView.swift */; };
 		B1000001000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1000001000000000000000D /* Assets.xcassets */; };
+		B1000001000000000000000E /* VideoQualitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000010 /* VideoQualitySettings.swift */; };
+		B1000001000000000000000F /* CameraSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000011 /* CameraSessionManager.swift */; };
+		B10000010000000000000010 /* VideoRecordingWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000012 /* VideoRecordingWriter.swift */; };
+		B10000010000000000000011 /* TeleprompterFrameCompositor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000013 /* TeleprompterFrameCompositor.swift */; };
+		B10000010000000000000012 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000014 /* CameraPreviewView.swift */; };
+		B10000010000000000000013 /* CameraRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000015 /* CameraRecordView.swift */; };
+		B10000010000000000000014 /* RecordSettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000016 /* RecordSettingsSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +45,13 @@
 		F1000001000000000000000C /* VisualTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualTimerView.swift; sourceTree = "<group>"; };
 		F1000001000000000000000D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F1000001000000000000000E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F10000010000000000000010 /* VideoQualitySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoQualitySettings.swift; sourceTree = "<group>"; };
+		F10000010000000000000011 /* CameraSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSessionManager.swift; sourceTree = "<group>"; };
+		F10000010000000000000012 /* VideoRecordingWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRecordingWriter.swift; sourceTree = "<group>"; };
+		F10000010000000000000013 /* TeleprompterFrameCompositor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterFrameCompositor.swift; sourceTree = "<group>"; };
+		F10000010000000000000014 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
+		F10000010000000000000015 /* CameraRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraRecordView.swift; sourceTree = "<group>"; };
+		F10000010000000000000016 /* RecordSettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordSettingsSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +79,7 @@
 				F10000010000000000000001 /* TeleprompterApp.swift */,
 				G10000010000000000000004 /* Theme */,
 				G10000010000000000000005 /* Models */,
+				G1000001000000000000000B /* Camera */,
 				G10000010000000000000006 /* Views */,
 				F1000001000000000000000D /* Assets.xcassets */,
 				F1000001000000000000000E /* Info.plist */,
@@ -93,8 +108,20 @@
 			children = (
 				F10000010000000000000003 /* PlaybackSettings.swift */,
 				F10000010000000000000004 /* Script.swift */,
+				F10000010000000000000010 /* VideoQualitySettings.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		G1000001000000000000000B /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				F10000010000000000000011 /* CameraSessionManager.swift */,
+				F10000010000000000000012 /* VideoRecordingWriter.swift */,
+				F10000010000000000000013 /* TeleprompterFrameCompositor.swift */,
+				F10000010000000000000014 /* CameraPreviewView.swift */,
+			);
+			path = Camera;
 			sourceTree = "<group>";
 		};
 		G10000010000000000000006 /* Views */ = {
@@ -105,8 +132,18 @@
 				G10000010000000000000008 /* Player */,
 				G10000010000000000000009 /* Settings */,
 				G1000001000000000000000A /* Timer */,
+				G1000001000000000000000C /* Record */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		G1000001000000000000000C /* Record */ = {
+			isa = PBXGroup;
+			children = (
+				F10000010000000000000015 /* CameraRecordView.swift */,
+				F10000010000000000000016 /* RecordSettingsSheet.swift */,
+			);
+			path = Record;
 			sourceTree = "<group>";
 		};
 		G10000010000000000000007 /* Scripts */ = {
@@ -225,6 +262,13 @@
 				B1000001000000000000000A /* TextHeightKey.swift in Sources */,
 				B1000001000000000000000B /* SettingsView.swift in Sources */,
 				B1000001000000000000000C /* VisualTimerView.swift in Sources */,
+				B1000001000000000000000E /* VideoQualitySettings.swift in Sources */,
+				B1000001000000000000000F /* CameraSessionManager.swift in Sources */,
+				B10000010000000000000010 /* VideoRecordingWriter.swift in Sources */,
+				B10000010000000000000011 /* TeleprompterFrameCompositor.swift in Sources */,
+				B10000010000000000000012 /* CameraPreviewView.swift in Sources */,
+				B10000010000000000000013 /* CameraRecordView.swift in Sources */,
+				B10000010000000000000014 /* RecordSettingsSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
