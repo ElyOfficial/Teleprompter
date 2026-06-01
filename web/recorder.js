@@ -1,5 +1,11 @@
 /** Camera + full-screen teleprompter scroll (text exits through top of screen) */
 
+const VIDEO_PRESETS = {
+  "720p": { width: 1280, height: 720, bitrate: 5_000_000 },
+  "1080p": { width: 1920, height: 1080, bitrate: 12_000_000 },
+  "4k": { width: 3840, height: 2160, bitrate: 28_000_000 },
+};
+
 export function createRecorder(deps) {
   const { $, settings, onClose } = deps;
 
@@ -13,9 +19,10 @@ export function createRecorder(deps) {
     recording: false,
     mediaRecorder: null,
     chunks: [],
-    layout: { x: 4, w: 92, fontScale: 1, frameH: 42 },
+    layout: { w: 92, fontScale: 1, frameH: 42 },
     scrollTouchY: null,
     wakeLock: null,
+    actualVideo: null,
   };
 
   const els = {
@@ -24,8 +31,8 @@ export function createRecorder(deps) {
     canvas: $("#composite"),
     stage: $("#scroll-stage"),
     column: $("#scroll-column"),
+    columnInner: $("#scroll-column-inner"),
     spacerTop: $("#scroll-spacer-top"),
-    spacerBottom: $("#scroll-spacer-bottom"),
     text: $("#recorder-text"),
     frame: $("#prompter-frame"),
     countdown: $("#countdown"),
@@ -35,36 +42,34 @@ export function createRecorder(deps) {
     btnRecord: $("#btn-rec-record"),
     btnFlip: $("#btn-flip-camera"),
     btnClose: $("#btn-close-recorder"),
+    btnSettings: $("#btn-rec-settings"),
     speed: $("#rec-speed"),
     readingLine: $("#rec-reading-line"),
+    settingsSheet: $("#rec-settings"),
+    cameraStatus: $("#rec-camera-status"),
   };
 
   const ctx = els.canvas.getContext("2d");
 
   function normalizeLayout(layout) {
     const L = layout || {};
+    const w = L.w ?? (L.x != null ? L.w : 92) ?? 92;
     return {
-      x: Math.min(24, Math.max(0, L.x ?? 4)),
-      w: Math.min(100, Math.max(50, L.w ?? 92)),
+      w: Math.min(98, Math.max(55, w)),
       fontScale: Math.min(1.6, Math.max(0.6, L.fontScale ?? 1)),
       frameH: Math.min(65, Math.max(28, L.frameH ?? L.h ?? 42)),
     };
   }
 
   function readingLinePx() {
-    const safe = parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue("--safe-top") || "0"
-    );
-    const vh = window.innerHeight;
-    return (Number.isNaN(safe) ? 0 : safe) + vh * 0.16;
+    return window.innerHeight * 0.16 + 8;
   }
 
   function applyLayout() {
     const L = state.layout;
-    const root = els.stage;
-    root.style.setProperty("--text-left", `${L.x}%`);
-    root.style.setProperty("--text-width", `${L.w}%`);
-    root.style.setProperty("--frame-height", `${L.frameH}%`);
+    els.stage.style.setProperty("--text-width", `${L.w}%`);
+    els.stage.style.setProperty("--frame-height", `${L.frameH}%`);
+
     const fontSize = settings.fontSize * L.fontScale * 0.55;
     els.text.style.fontSize = `${fontSize}px`;
     els.text.style.lineHeight = `${(fontSize + settings.lineSpacing * L.fontScale * 0.35) / fontSize}`;
@@ -72,28 +77,23 @@ export function createRecorder(deps) {
     els.text.style.paddingLeft = els.text.style.paddingRight = `${settings.margin * L.fontScale * 0.25}px`;
     els.text.style.transform = settings.mirror ? "scaleX(-1)" : "";
     els.text.style.background = hexToRgba(settings.bgColor, 0.52);
-
     els.readingLine.classList.toggle("hidden", !settings.guide);
     updateSpacers();
   }
 
   function updateSpacers() {
-    const readY = readingLinePx();
-    els.spacerTop.style.height = `${readY}px`;
+    els.spacerTop.style.height = `${readingLinePx()}px`;
   }
 
   function hexToRgba(hex, a) {
     const h = hex.replace("#", "");
     const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
     const n = parseInt(full, 16);
-    const r = (n >> 16) & 255;
-    const g = (n >> 8) & 255;
-    const b = n & 255;
-    return `rgba(${r},${g},${b},${a})`;
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
   }
 
   function columnHeight() {
-    return els.column.offsetHeight;
+    return els.columnInner.offsetHeight;
   }
 
   function maxScroll() {
@@ -102,7 +102,7 @@ export function createRecorder(deps) {
 
   function setOffset(y) {
     state.offset = Math.min(0, Math.max(-maxScroll(), y));
-    els.column.style.transform = `translate3d(0, ${state.offset}px, 0)`;
+    els.columnInner.style.transform = `translate3d(0, ${state.offset}px, 0)`;
   }
 
   function stopScroll() {
@@ -114,13 +114,9 @@ export function createRecorder(deps) {
 
   function scrollLoop() {
     if (!state.playing) return;
-    const speed = Number(els.speed.value) / 60;
-    setOffset(state.offset - speed);
-    if (state.offset <= -maxScroll()) {
-      stopScroll();
-      return;
-    }
-    state.raf = requestAnimationFrame(scrollLoop);
+    setOffset(state.offset - Number(els.speed.value) / 60);
+    if (state.offset <= -maxScroll()) stopScroll();
+    else state.raf = requestAnimationFrame(scrollLoop);
   }
 
   function startScroll() {
@@ -131,10 +127,7 @@ export function createRecorder(deps) {
 
   function runCountdown(then) {
     let n = settings.countdown;
-    if (n <= 0) {
-      then();
-      return;
-    }
+    if (n <= 0) return then();
     els.countdown.classList.remove("hidden");
     els.countdown.textContent = n;
     const tick = () => {
@@ -150,19 +143,66 @@ export function createRecorder(deps) {
     setTimeout(tick, 1000);
   }
 
+  function videoConstraints() {
+    const preset = VIDEO_PRESETS[settings.videoQuality] || VIDEO_PRESETS["1080p"];
+    const fps = Number(settings.videoFps) || 30;
+    return {
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 48000,
+      },
+      video: {
+        facingMode: state.facing,
+        width: { ideal: preset.width, min: 640 },
+        height: { ideal: preset.height, min: 480 },
+        frameRate: { ideal: fps, min: 24, max: fps },
+        resizeMode: "none",
+      },
+    };
+  }
+
+  function updateCameraStatusLabel() {
+    const v = els.video;
+    const track = state.stream?.getVideoTracks()[0];
+    const settingsInfo = track?.getSettings?.();
+    const preset = settings.videoQuality || "1080p";
+    const fps = settings.videoFps || 30;
+    let line = `${preset} · ${fps} fps requested`;
+    if (v.videoWidth && settingsInfo) {
+      line = `${v.videoWidth}×${v.videoHeight} · ${Math.round(settingsInfo.frameRate || fps)} fps · ${preset}`;
+    }
+    if (els.cameraStatus) els.cameraStatus.textContent = `Camera: ${line}`;
+  }
+
   async function startCamera() {
     stopCamera();
+    const constraints = videoConstraints();
     try {
-      state.stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: { facingMode: state.facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
-      });
-    } catch {
-      alert("Camera access is required. Allow camera & microphone in Settings → Safari.");
-      throw new Error("no camera");
+      state.stream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (err) {
+      if (settings.videoQuality === "4k") {
+        settings.videoQuality = "1080p";
+        deps.saveSettings();
+        syncRecSettingsUI();
+        try {
+          state.stream = await navigator.mediaDevices.getUserMedia(videoConstraints());
+        } catch {
+          alert("Camera access failed. Allow camera & mic in Settings → Safari.");
+          throw err;
+        }
+      } else {
+        alert("Camera access failed. Allow camera & mic in Settings → Safari.");
+        throw err;
+      }
     }
     els.video.srcObject = state.stream;
     await els.video.play();
+    await new Promise((r) => {
+      if (els.video.videoWidth) r();
+      else els.video.onloadedmetadata = () => r();
+    });
+    updateCameraStatusLabel();
   }
 
   function stopCamera() {
@@ -175,19 +215,17 @@ export function createRecorder(deps) {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const L = state.layout;
-    const left = (L.x / 100) * vw;
     const width = (L.w / 100) * vw;
+    const left = (vw - width) / 2;
     const fontSize = settings.fontSize * L.fontScale * 0.55;
     const lineH = fontSize + settings.lineSpacing * L.fontScale * 0.35;
     const pad = settings.margin * L.fontScale * 0.25;
-    const readY = readingLinePx();
-    return { vw, vh, left, width, fontSize, lineH, pad, readY };
+    return { vw, vh, left, width, fontSize, lineH, pad, readY: readingLinePx() };
   }
 
   function drawWrappedText(ctx, text, x, y, maxW, lineH) {
-    const lines = text.split("\n");
     let cy = y;
-    for (const line of lines) {
+    for (const line of text.split("\n")) {
       const words = line.split(" ");
       let row = "";
       for (const word of words) {
@@ -204,7 +242,6 @@ export function createRecorder(deps) {
       }
       cy += lineH * 0.12;
     }
-    return cy;
   }
 
   function drawCompositeFrame() {
@@ -214,7 +251,6 @@ export function createRecorder(deps) {
     const h = v.videoHeight;
     if (els.canvas.width !== w) els.canvas.width = w;
     if (els.canvas.height !== h) els.canvas.height = h;
-
     ctx.drawImage(v, 0, 0, w, h);
 
     const m = layoutMetrics();
@@ -226,31 +262,24 @@ export function createRecorder(deps) {
     const lineH = m.lineH * sx;
     const pad = m.pad * sx;
     const readY = m.readY * sy;
-    const scrollY = state.offset * sy;
 
     ctx.save();
-    ctx.beginPath();
     ctx.rect(0, 0, w, h);
     ctx.clip();
-
     ctx.font = `600 ${fontSize}px -apple-system, sans-serif`;
-    ctx.textAlign = "left";
     ctx.fillStyle = settings.textColor;
-
+    ctx.shadowColor = "rgba(0,0,0,0.9)";
+    ctx.shadowBlur = 8 * sx;
+    const startY = readY + state.offset * sy + fontSize;
     const body = state.script?.body || "";
-    const startY = m.readY * sy + scrollY + fontSize;
 
     if (settings.mirror) {
       ctx.save();
       ctx.translate(left + maxW, 0);
       ctx.scale(-1, 1);
-      ctx.shadowColor = "rgba(0,0,0,0.9)";
-      ctx.shadowBlur = 8 * sx;
       drawWrappedText(ctx, body, left + pad, startY, maxW - pad * 2, lineH);
       ctx.restore();
     } else {
-      ctx.shadowColor = "rgba(0,0,0,0.9)";
-      ctx.shadowBlur = 8 * sx;
       drawWrappedText(ctx, body, left + pad, startY, maxW - pad * 2, lineH);
     }
 
@@ -263,7 +292,6 @@ export function createRecorder(deps) {
       ctx.lineTo(left + maxW, readY);
       ctx.stroke();
     }
-
     ctx.restore();
   }
 
@@ -291,11 +319,19 @@ export function createRecorder(deps) {
     if (state.recording) return;
     drawCompositeFrame();
     const mime = pickMimeType();
-    const stream = els.canvas.captureStream(30);
+    const fps = Number(settings.videoFps) || 30;
+    const preset = VIDEO_PRESETS[settings.videoQuality] || VIDEO_PRESETS["1080p"];
+    const stream = els.canvas.captureStream(fps);
     const audio = state.stream?.getAudioTracks()[0];
     if (audio) stream.addTrack(audio);
+
     state.chunks = [];
-    state.mediaRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    const opts = { mimeType: mime || undefined, videoBitsPerSecond: preset.bitrate };
+    try {
+      state.mediaRecorder = new MediaRecorder(stream, opts);
+    } catch {
+      state.mediaRecorder = new MediaRecorder(stream);
+    }
     state.mediaRecorder.ondataavailable = (e) => e.data.size && state.chunks.push(e.data);
     state.mediaRecorder.onstop = saveRecording;
     state.mediaRecorder.start(1000);
@@ -328,7 +364,88 @@ export function createRecorder(deps) {
     a.href = URL.createObjectURL(blob);
     a.download = name;
     a.click();
-    alert("Recording saved — use Share or Files to move it to Photos.");
+  }
+
+  function openSettingsSheet() {
+    syncRecSettingsUI();
+    els.settingsSheet.classList.remove("hidden");
+    els.settingsSheet.setAttribute("aria-hidden", "false");
+  }
+
+  function closeSettingsSheet() {
+    els.settingsSheet.classList.add("hidden");
+    els.settingsSheet.setAttribute("aria-hidden", "true");
+  }
+
+  function syncRecSettingsUI() {
+    const map = [
+      ["rec-set-font", settings.fontSize, "rec-val-font"],
+      ["rec-set-line", settings.lineSpacing, "rec-val-line"],
+      ["rec-set-margin", settings.margin, "rec-val-margin"],
+      ["rec-set-speed", settings.speed, "rec-val-speed"],
+    ];
+    map.forEach(([id, val, labelId]) => {
+      const el = $(`#${id}`);
+      if (el) el.value = val;
+      const lab = $(`#${labelId}`);
+      if (lab) lab.textContent = val;
+    });
+    const cd = $("#rec-set-countdown");
+    if (cd) cd.value = settings.countdown;
+    const g = $("#rec-set-guide");
+    if (g) g.checked = settings.guide;
+    const m = $("#rec-set-mirror");
+    if (m) m.checked = settings.mirror;
+    const tc = $("#rec-set-text-color");
+    if (tc) tc.value = settings.textColor;
+    const bc = $("#rec-set-bg-color");
+    if (bc) bc.value = settings.bgColor;
+    const q = $("#rec-set-quality");
+    if (q) q.value = settings.videoQuality || "1080p";
+    const f = $("#rec-set-fps");
+    if (f) f.value = String(settings.videoFps || 30);
+    if (els.speed) els.speed.value = settings.speed;
+  }
+
+  function bindRecSetting(id, key, labelId, parser = Number) {
+    const el = $(`#${id}`);
+    if (!el) return;
+    el.addEventListener("input", async () => {
+      const val = el.type === "checkbox" ? el.checked : parser(el.value);
+      settings[key] = val;
+      if (labelId) {
+        const lab = $(`#${labelId}`);
+        if (lab) lab.textContent = el.type === "checkbox" ? "" : val;
+      }
+      deps.saveSettings();
+      applyLayout();
+      if (key === "speed" && els.speed) els.speed.value = settings.speed;
+      if (key === "videoQuality" || key === "videoFps") {
+        if (!els.root.classList.contains("hidden")) await startCamera();
+      }
+    });
+  }
+
+  function bindRecSettings() {
+    bindRecSetting("rec-set-font", "fontSize", "rec-val-font");
+    bindRecSetting("rec-set-line", "lineSpacing", "rec-val-line");
+    bindRecSetting("rec-set-margin", "margin", "rec-val-margin");
+    bindRecSetting("rec-set-speed", "speed", "rec-val-speed");
+    bindRecSetting("rec-set-countdown", "countdown", null);
+    bindRecSetting("rec-set-guide", "guide", null, (v) => v);
+    bindRecSetting("rec-set-mirror", "mirror", null, (v) => v);
+    $("#rec-set-text-color")?.addEventListener("input", (e) => {
+      settings.textColor = e.target.value;
+      deps.saveSettings();
+      applyLayout();
+    });
+    $("#rec-set-bg-color")?.addEventListener("input", (e) => {
+      settings.bgColor = e.target.value;
+      deps.saveSettings();
+      applyLayout();
+    });
+    bindRecSetting("rec-set-quality", "videoQuality", null, (v) => v);
+    bindRecSetting("rec-set-fps", "videoFps", null, (v) => Number(v));
   }
 
   async function open(script) {
@@ -342,6 +459,7 @@ export function createRecorder(deps) {
     els.speed.value = settings.speed;
     applyLayout();
     setOffset(0);
+    closeSettingsSheet();
 
     els.root.classList.remove("hidden");
     els.root.setAttribute("aria-hidden", "false");
@@ -364,6 +482,7 @@ export function createRecorder(deps) {
   }
 
   function close() {
+    closeSettingsSheet();
     stopRecording();
     stopScroll();
     stopCompositeLoop();
@@ -397,15 +516,13 @@ export function createRecorder(deps) {
       const dy = ((cy - startY) / window.innerHeight) * 100;
       const L = { ...start };
 
-      if (mode.includes("e")) L.w = Math.min(100 - L.x, Math.max(50, start.w + dx));
-      if (mode.includes("w")) {
-        const nw = Math.max(50, start.w - dx);
-        L.x = Math.max(0, start.x + (start.w - nw));
-        L.w = nw;
+      if (mode === "width") {
+        L.w = Math.min(98, Math.max(55, start.w + dx * 2));
       }
-      if (mode.includes("se")) {
-        L.fontScale = Math.min(1.6, Math.max(0.6, start.fontScale + dy * 0.02 + dx * 0.01));
+      if (mode === "se") {
+        L.fontScale = Math.min(1.6, Math.max(0.6, start.fontScale + dy * 0.02 + dx * 0.008));
         L.frameH = Math.min(65, Math.max(28, start.frameH + dy * 0.5));
+        L.w = Math.min(98, Math.max(55, start.w + dx * 2));
       }
 
       state.layout = normalizeLayout(L);
@@ -430,32 +547,22 @@ export function createRecorder(deps) {
   els.frame.addEventListener("pointerdown", pointerLayoutInteraction);
   els.frame.addEventListener("touchstart", pointerLayoutInteraction, { passive: false });
 
-  els.stage.addEventListener(
-    "touchstart",
-    (e) => {
-      if (state.playing || e.target.closest(".resize-handle")) return;
-      state.scrollTouchY = e.touches[0].clientY;
-    },
-    { passive: true }
-  );
-  els.stage.addEventListener(
-    "touchmove",
-    (e) => {
-      if (state.playing || state.scrollTouchY == null) return;
-      const dy = e.touches[0].clientY - state.scrollTouchY;
-      state.scrollTouchY = e.touches[0].clientY;
-      setOffset(state.offset + dy);
-    },
-    { passive: true }
-  );
+  els.stage.addEventListener("touchstart", (e) => {
+    if (state.playing || e.target.closest(".resize-handle, .rec-settings")) return;
+    state.scrollTouchY = e.touches[0].clientY;
+  }, { passive: true });
+  els.stage.addEventListener("touchmove", (e) => {
+    if (state.playing || state.scrollTouchY == null) return;
+    const dy = e.touches[0].clientY - state.scrollTouchY;
+    state.scrollTouchY = e.touches[0].clientY;
+    setOffset(state.offset + dy);
+  }, { passive: true });
   els.stage.addEventListener("touchend", () => {
     state.scrollTouchY = null;
   });
 
   window.addEventListener("resize", () => {
-    if (!els.root.classList.contains("hidden")) {
-      updateSpacers();
-    }
+    if (!els.root.classList.contains("hidden")) updateSpacers();
   });
 
   els.btnClose.addEventListener("click", close);
@@ -463,6 +570,13 @@ export function createRecorder(deps) {
     e.stopPropagation();
     flipCamera();
   });
+  els.btnSettings?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openSettingsSheet();
+  });
+  $("#btn-close-rec-settings")?.addEventListener("click", closeSettingsSheet);
+  $(".rec-settings-backdrop")?.addEventListener("click", closeSettingsSheet);
+
   els.btnPlay.addEventListener("click", (e) => {
     e.stopPropagation();
     if (state.playing) stopScroll();
@@ -475,13 +589,19 @@ export function createRecorder(deps) {
   });
   els.speed.addEventListener("input", (e) => {
     settings.speed = Number(e.target.value);
+    const rs = $("#rec-set-speed");
+    if (rs) rs.value = settings.speed;
+    const lab = $("#rec-val-speed");
+    if (lab) lab.textContent = settings.speed;
     deps.saveSettings();
   });
 
   els.root.addEventListener("click", (e) => {
-    if (e.target.closest(".rec-controls-bar, .prompter-frame, .resize-handle, .scroll-column")) return;
+    if (e.target.closest(".rec-controls-bar, .prompter-frame, .resize-handle, .scroll-column, .rec-settings")) return;
     els.controls.classList.toggle("hidden-ui");
   });
+
+  bindRecSettings();
 
   return { open, close };
 }

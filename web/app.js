@@ -13,7 +13,9 @@ const DEFAULT_SETTINGS = {
   mirror: false,
   textColor: "#ffffff",
   bgColor: "#000000",
-  prompterBox: { x: 4, w: 92, fontScale: 1, frameH: 42 },
+  prompterBox: { w: 92, fontScale: 1, frameH: 42 },
+  videoQuality: "1080p",
+  videoFps: 30,
 };
 
 let scripts = [];
@@ -180,7 +182,20 @@ function syncSettingsUI() {
   $("#val-line").textContent = settings.lineSpacing;
   $("#val-margin").textContent = settings.margin;
   $("#val-speed").textContent = settings.speed;
+  const q = $("#set-quality");
+  if (q) q.value = settings.videoQuality || "1080p";
+  const f = $("#set-fps");
+  if (f) f.value = String(settings.videoFps || 30);
 }
+
+$("#set-quality")?.addEventListener("change", (e) => {
+  settings.videoQuality = e.target.value;
+  saveSettings();
+});
+$("#set-fps")?.addEventListener("change", (e) => {
+  settings.videoFps = Number(e.target.value);
+  saveSettings();
+});
 
 [
   ["set-font", "fontSize", "val-font"],
@@ -291,7 +306,7 @@ $("#timer-start").addEventListener("click", () => {
 
 // --- Service worker + version ---
 
-const BUILD_ID = "scroll-off-top-v5-2026-06-01";
+const BUILD_ID = "center-settings-hd-v6-2026-06-01";
 
 async function refreshAppCache() {
   if ("serviceWorker" in navigator) {
@@ -309,7 +324,7 @@ $("#btn-force-update")?.addEventListener("click", refreshAppCache);
 
 function showBuildTag() {
   const el = $("#build-tag");
-  if (el) el.textContent = `Build: ${BUILD_ID} (scrolls off top)`;
+  if (el) el.textContent = `Build: ${BUILD_ID}`;
 }
 
 if ("serviceWorker" in navigator) {

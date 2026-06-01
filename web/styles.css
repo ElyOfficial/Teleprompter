@@ -292,10 +292,13 @@ html, body {
 }
 .scroll-column {
   position: absolute;
-  left: var(--text-left, 4%);
+  left: 50%;
   width: var(--text-width, 92%);
-  will-change: transform;
+  transform: translateX(-50%);
   pointer-events: auto;
+}
+.scroll-column-inner {
+  will-change: transform;
 }
 .scroll-spacer-top,
 .scroll-spacer-bottom {
@@ -323,8 +326,9 @@ html, body {
 
 .reading-line-screen {
   position: absolute;
-  left: var(--text-left, 4%);
+  left: 50%;
   width: var(--text-width, 92%);
+  transform: translateX(-50%);
   top: calc(env(safe-area-inset-top, 0px) + 16vh);
   height: 2px;
   background: rgba(255, 159, 10, 0.6);
@@ -349,8 +353,9 @@ html, body {
 .prompter-frame {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 4px);
-  left: var(--text-left, 4%);
+  left: 50%;
   width: var(--text-width, 92%);
+  transform: translateX(-50%);
   height: var(--frame-height, 42%);
   border: 2px solid rgba(255, 159, 10, 0.45);
   border-radius: 12px;
@@ -391,21 +396,112 @@ html, body {
   font-size: 1rem;
   color: var(--accent);
 }
-.resize-handle[data-handle="e"] {
-  right: -14px;
-  top: 40%;
-  bottom: 30%;
-  width: 28px;
-  height: auto;
-  cursor: ew-resize;
+.resize-handle[data-handle="width"] {
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  width: 48%;
+  height: 28px;
+  cursor: ns-resize;
 }
-.resize-handle[data-handle="w"] {
-  left: -14px;
-  top: 40%;
-  bottom: 30%;
-  width: 28px;
-  height: auto;
-  cursor: ew-resize;
+
+/* In-recorder settings sheet */
+.rec-settings {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.rec-settings:not(.hidden) {
+  pointer-events: auto;
+}
+.rec-settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+.rec-settings-panel {
+  position: relative;
+  width: 100%;
+  max-height: 78vh;
+  background: #1c1c1e;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.rec-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.rec-settings-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.btn-done {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.rec-settings-body {
+  overflow-y: auto;
+  padding: 8px 16px calc(24px + var(--safe-bottom));
+}
+.rec-set-section {
+  margin-bottom: 20px;
+}
+.rec-set-section h4 {
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  margin: 12px 0 8px;
+}
+.rec-set-row {
+  display: block;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.95rem;
+}
+.rec-set-row span:first-child { color: #fff; }
+.rec-set-row > span[id^="rec-val"] {
+  float: right;
+  color: var(--accent);
+}
+.rec-set-row input[type="range"] {
+  width: 100%;
+  margin-top: 8px;
+  accent-color: var(--accent);
+}
+.rec-set-row select,
+.rec-set-row input[type="number"],
+.rec-set-row input[type="color"] {
+  float: right;
+}
+.rec-set-row select {
+  max-width: 55%;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  background: var(--card);
+  color: #fff;
+}
+.rec-set-row.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rec-set-note {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 8px 0 0;
+  line-height: 1.4;
 }
 
 .countdown {

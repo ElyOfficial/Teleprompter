@@ -68,6 +68,23 @@
         </label>
       </div>
       <div class="settings-group">
+        <h2>CAMERA</h2>
+        <label class="row">Recording quality
+          <select id="set-quality" style="float:right">
+            <option value="720p">HD 720p</option>
+            <option value="1080p">Full HD 1080p</option>
+            <option value="4k">4K (when available)</option>
+          </select>
+        </label>
+        <label class="row">Frame rate
+          <select id="set-fps" style="float:right">
+            <option value="24">24 fps</option>
+            <option value="30">30 fps</option>
+            <option value="60">60 fps</option>
+          </select>
+        </label>
+      </div>
+      <div class="settings-group">
         <h2>PLAYBACK</h2>
         <label class="row">Scroll speed <span id="val-speed">42</span>
           <input type="range" id="set-speed" min="10" max="120" value="42" />
@@ -117,24 +134,81 @@
 
     <div id="scroll-stage" class="scroll-stage">
       <div id="scroll-column" class="scroll-column">
-        <div id="scroll-spacer-top" class="scroll-spacer-top"></div>
-        <div id="recorder-text" class="recorder-text"></div>
-        <div id="scroll-spacer-bottom" class="scroll-spacer-bottom"></div>
+        <div id="scroll-column-inner" class="scroll-column-inner">
+          <div id="scroll-spacer-top" class="scroll-spacer-top"></div>
+          <div id="recorder-text" class="recorder-text"></div>
+          <div id="scroll-spacer-bottom" class="scroll-spacer-bottom"></div>
+        </div>
       </div>
       <div id="rec-reading-line" class="reading-line-screen"></div>
       <div id="prompter-frame" class="prompter-frame">
-        <span class="resize-handle grip" data-handle="se" aria-label="Text size"></span>
-        <span class="resize-handle" data-handle="e" aria-label="Width"></span>
-        <span class="resize-handle" data-handle="w" aria-label="Width"></span>
+        <span class="resize-handle grip" data-handle="se" aria-label="Size"></span>
+        <span class="resize-handle" data-handle="width" aria-label="Width"></span>
       </div>
     </div>
 
     <div id="countdown" class="countdown hidden"></div>
 
+    <div id="rec-settings" class="rec-settings hidden" aria-hidden="true">
+      <div class="rec-settings-backdrop"></div>
+      <div class="rec-settings-panel">
+        <header class="rec-settings-header">
+          <h3>Settings</h3>
+          <button type="button" class="btn-done" id="btn-close-rec-settings">Done</button>
+        </header>
+        <div class="rec-settings-body">
+          <section class="rec-set-section">
+            <h4>PLAYBACK</h4>
+            <label class="rec-set-row">Text size <span id="rec-val-font">52</span>
+              <input type="range" id="rec-set-font" min="24" max="96" />
+            </label>
+            <label class="rec-set-row">Line spacing <span id="rec-val-line">12</span>
+              <input type="range" id="rec-set-line" min="0" max="32" />
+            </label>
+            <label class="rec-set-row">Side margin <span id="rec-val-margin">28</span>
+              <input type="range" id="rec-set-margin" min="0" max="80" />
+            </label>
+            <label class="rec-set-row">Scroll speed <span id="rec-val-speed">42</span>
+              <input type="range" id="rec-set-speed" min="10" max="120" />
+            </label>
+            <label class="rec-set-row">Countdown (sec)
+              <input type="number" id="rec-set-countdown" min="0" max="10" />
+            </label>
+            <label class="rec-set-row toggle"><span>Reading line</span><input type="checkbox" id="rec-set-guide" /></label>
+            <label class="rec-set-row toggle"><span>Mirror text</span><input type="checkbox" id="rec-set-mirror" /></label>
+          </section>
+          <section class="rec-set-section">
+            <h4>COLOR</h4>
+            <label class="rec-set-row">Text <input type="color" id="rec-set-text-color" /></label>
+            <label class="rec-set-row">Text background <input type="color" id="rec-set-bg-color" /></label>
+          </section>
+          <section class="rec-set-section">
+            <h4>CAMERA</h4>
+            <label class="rec-set-row">Quality
+              <select id="rec-set-quality">
+                <option value="720p">HD 720p</option>
+                <option value="1080p" selected>Full HD 1080p</option>
+                <option value="4k">4K (when available)</option>
+              </select>
+            </label>
+            <label class="rec-set-row">Frame rate
+              <select id="rec-set-fps">
+                <option value="24">24 fps</option>
+                <option value="30" selected>30 fps</option>
+                <option value="60">60 fps</option>
+              </select>
+            </label>
+            <p class="rec-set-note" id="rec-camera-status">Camera: —</p>
+          </section>
+        </div>
+      </div>
+    </div>
+
     <div id="recorder-controls" class="recorder-controls">
       <div class="rec-top-bar">
         <button type="button" class="icon-btn light" id="btn-close-recorder" aria-label="Close">✕</button>
         <h2 id="recorder-title"></h2>
+        <button type="button" class="icon-btn light" id="btn-rec-settings" aria-label="Settings">⚙</button>
         <button type="button" class="icon-btn light" id="btn-flip-camera" aria-label="Flip camera">⟳</button>
       </div>
       <div class="rec-controls-bar">
@@ -144,7 +218,7 @@
           <input type="range" id="rec-speed" min="10" max="120" value="42" />
         </label>
       </div>
-      <p class="rec-hint">Script scrolls up and off the top · resize grip for text size · ● to record</p>
+      <p class="rec-hint">⚙ settings · ⤡ resize · script scrolls off the top · ● record</p>
     </div>
   </div>
 
