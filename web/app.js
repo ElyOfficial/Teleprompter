@@ -289,18 +289,50 @@ $("#timer-start").addEventListener("click", () => {
   timerInterval = setInterval(tickTimer, 100);
 });
 
-// --- Service worker ---
+// --- Service worker + version ---
+
+const BUILD_ID = "camera-v3-2026-06-01";
+
+async function refreshAppCache() {
+  if ("serviceWorker" in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map((r) => r.unregister()));
+  }
+  if ("caches" in window) {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => caches.delete(k)));
+  }
+  window.location.reload();
+}
+
+$("#btn-force-update")?.addEventListener("click", refreshAppCache);
+
+function showBuildTag() {
+  const el = $("#build-tag");
+  if (el) el.textContent = `Build: ${BUILD_ID} (camera + record)`;
+}
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js").catch(() => {});
+  navigator.serviceWorker
+    .register("./sw.js", { updateViaCache: "none" })
+    .then((reg) => {
+      reg.update();
+      reg.addEventListener("updatefound", () => {
+        const worker = reg.installing;
+        worker?.addEventListener("statechange", () => {
+          if (worker.state === "activated" && navigator.serviceWorker.controller) {
+            window.location.reload();
+          }
+        });
+      });
+    })
+    .catch(() => {});
 }
 
 // --- Init ---
 
 load();
-if (settings.prompterBox) {
-  // restored inside recorder on open
-}
 renderScripts();
 syncSettingsUI();
+showBuildTag();
 showView("scripts");

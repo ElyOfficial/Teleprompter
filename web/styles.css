@@ -222,6 +222,12 @@ html, body {
 .row input[type="number"] { float: right; width: 56px; padding: 6px; border-radius: 8px; border: none; background: var(--bg); color: var(--text); }
 .toggle-row { display: flex; align-items: center; justify-content: space-between; }
 .toggle-row input { width: auto; float: none; }
+.build-tag {
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin: 8px 0 0;
+  font-variant-numeric: tabular-nums;
+}
 
 .tab-bar {
   position: fixed;
