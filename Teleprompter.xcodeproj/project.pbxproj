@@ -1,0 +1,358 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B10000010000000000000001 /* TeleprompterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000001 /* TeleprompterApp.swift */; };
+		B10000010000000000000002 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000002 /* AppTheme.swift */; };
+		B10000010000000000000003 /* PlaybackSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000003 /* PlaybackSettings.swift */; };
+		B10000010000000000000004 /* Script.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000004 /* Script.swift */; };
+		B10000010000000000000005 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000005 /* MainTabView.swift */; };
+		B10000010000000000000006 /* ScriptsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000006 /* ScriptsListView.swift */; };
+		B10000010000000000000007 /* ScriptGridCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000007 /* ScriptGridCard.swift */; };
+		B10000010000000000000008 /* ScriptEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000008 /* ScriptEditorView.swift */; };
+		B10000010000000000000009 /* TeleprompterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000009 /* TeleprompterView.swift */; };
+		B1000001000000000000000A /* TextHeightKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000001000000000000000A /* TextHeightKey.swift */; };
+		B1000001000000000000000B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000001000000000000000B /* SettingsView.swift */; };
+		B1000001000000000000000C /* VisualTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000001000000000000000C /* VisualTimerView.swift */; };
+		B1000001000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1000001000000000000000D /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E10000010000000000000001 /* Teleprompter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teleprompter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F10000010000000000000001 /* TeleprompterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterApp.swift; sourceTree = "<group>"; };
+		F10000010000000000000002 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		F10000010000000000000003 /* PlaybackSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackSettings.swift; sourceTree = "<group>"; };
+		F10000010000000000000004 /* Script.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Script.swift; sourceTree = "<group>"; };
+		F10000010000000000000005 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		F10000010000000000000006 /* ScriptsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptsListView.swift; sourceTree = "<group>"; };
+		F10000010000000000000007 /* ScriptGridCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptGridCard.swift; sourceTree = "<group>"; };
+		F10000010000000000000008 /* ScriptEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptEditorView.swift; sourceTree = "<group>"; };
+		F10000010000000000000009 /* TeleprompterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeleprompterView.swift; sourceTree = "<group>"; };
+		F1000001000000000000000A /* TextHeightKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextHeightKey.swift; sourceTree = "<group>"; };
+		F1000001000000000000000B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F1000001000000000000000C /* VisualTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualTimerView.swift; sourceTree = "<group>"; };
+		F1000001000000000000000D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F1000001000000000000000E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C10000010000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		G10000010000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				G10000010000000000000002 /* Teleprompter */,
+				G10000010000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		G10000010000000000000002 /* Teleprompter */ = {
+			isa = PBXGroup;
+			children = (
+				F10000010000000000000001 /* TeleprompterApp.swift */,
+				G10000010000000000000004 /* Theme */,
+				G10000010000000000000005 /* Models */,
+				G10000010000000000000006 /* Views */,
+				F1000001000000000000000D /* Assets.xcassets */,
+				F1000001000000000000000E /* Info.plist */,
+			);
+			path = Teleprompter;
+			sourceTree = "<group>";
+		};
+		G10000010000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E10000010000000000000001 /* Teleprompter.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		G10000010000000000000004 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				F10000010000000000000002 /* AppTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		G10000010000000000000005 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F10000010000000000000003 /* PlaybackSettings.swift */,
+				F10000010000000000000004 /* Script.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		G10000010000000000000006 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F10000010000000000000005 /* MainTabView.swift */,
+				G10000010000000000000007 /* Scripts */,
+				G10000010000000000000008 /* Player */,
+				G10000010000000000000009 /* Settings */,
+				G1000001000000000000000A /* Timer */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		G10000010000000000000007 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				F10000010000000000000006 /* ScriptsListView.swift */,
+				F10000010000000000000007 /* ScriptGridCard.swift */,
+				F10000010000000000000008 /* ScriptEditorView.swift */,
+			);
+			path = Scripts;
+			sourceTree = "<group>";
+		};
+		G10000010000000000000008 /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				F10000010000000000000009 /* TeleprompterView.swift */,
+				F1000001000000000000000A /* TextHeightKey.swift */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
+		G10000010000000000000009 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F1000001000000000000000B /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		G1000001000000000000000A /* Timer */ = {
+			isa = PBXGroup;
+			children = (
+				F1000001000000000000000C /* VisualTimerView.swift */,
+			);
+			path = Timer;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		T10000010000000000000001 /* Teleprompter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = X10000010000000000000003 /* Build configuration list for PBXNativeTarget "Teleprompter" */;
+			buildPhases = (
+				S10000010000000000000001 /* Sources */,
+				C10000010000000000000001 /* Frameworks */,
+				R10000010000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Teleprompter;
+			productName = Teleprompter;
+			productReference = E10000010000000000000001 /* Teleprompter.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		P10000010000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					T10000010000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = X10000010000000000000001 /* Build configuration list for PBXProject "Teleprompter" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = G10000010000000000000001;
+			productRefGroup = G10000010000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				T10000010000000000000001 /* Teleprompter */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		R10000010000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1000001000000000000000D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		S10000010000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B10000010000000000000001 /* TeleprompterApp.swift in Sources */,
+				B10000010000000000000002 /* AppTheme.swift in Sources */,
+				B10000010000000000000003 /* PlaybackSettings.swift in Sources */,
+				B10000010000000000000004 /* Script.swift in Sources */,
+				B10000010000000000000005 /* MainTabView.swift in Sources */,
+				B10000010000000000000006 /* ScriptsListView.swift in Sources */,
+				B10000010000000000000007 /* ScriptGridCard.swift in Sources */,
+				B10000010000000000000008 /* ScriptEditorView.swift in Sources */,
+				B10000010000000000000009 /* TeleprompterView.swift in Sources */,
+				B1000001000000000000000A /* TextHeightKey.swift in Sources */,
+				B1000001000000000000000B /* SettingsView.swift in Sources */,
+				B1000001000000000000000C /* VisualTimerView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		Y10000010000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		Y10000010000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		Y10000010000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Teleprompter/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Teleprompter;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.Teleprompter;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		Y10000010000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Teleprompter/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Teleprompter;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.Teleprompter;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		X10000010000000000000001 /* Build configuration list for PBXProject "Teleprompter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				Y10000010000000000000001 /* Debug */,
+				Y10000010000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		X10000010000000000000003 /* Build configuration list for PBXNativeTarget "Teleprompter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				Y10000010000000000000003 /* Debug */,
+				Y10000010000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = P10000010000000000000001 /* Project object */;
+}
