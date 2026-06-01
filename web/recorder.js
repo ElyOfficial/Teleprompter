@@ -1,4 +1,4 @@
-/** Camera + resizable teleprompter overlay + video recording */
+/** Camera + full-screen teleprompter scroll (text exits through top of screen) */
 
 export function createRecorder(deps) {
   const { $, settings, onClose } = deps;
@@ -13,8 +13,7 @@ export function createRecorder(deps) {
     recording: false,
     mediaRecorder: null,
     chunks: [],
-    box: { x: 4, w: 92, h: 38 },
-    drag: null,
+    layout: { x: 4, w: 92, fontScale: 1, frameH: 42 },
     scrollTouchY: null,
     wakeLock: null,
   };
@@ -23,9 +22,12 @@ export function createRecorder(deps) {
     root: $("#recorder"),
     video: $("#camera"),
     canvas: $("#composite"),
-    box: $("#prompter-box"),
+    stage: $("#scroll-stage"),
+    column: $("#scroll-column"),
+    spacerTop: $("#scroll-spacer-top"),
+    spacerBottom: $("#scroll-spacer-bottom"),
     text: $("#recorder-text"),
-    scrollInner: $("#box-scroll-inner"),
+    frame: $("#prompter-frame"),
     countdown: $("#countdown"),
     controls: $("#recorder-controls"),
     title: $("#recorder-title"),
@@ -39,42 +41,45 @@ export function createRecorder(deps) {
 
   const ctx = els.canvas.getContext("2d");
 
-  /** Top edge is fixed under the camera; only width, horizontal inset, and height adjust. */
-  function normalizeBox(box) {
-    if (!box) return { x: 4, w: 92, h: 38 };
+  function normalizeLayout(layout) {
+    const L = layout || {};
     return {
-      x: Math.min(20, Math.max(0, box.x ?? 4)),
-      w: Math.min(100, Math.max(40, box.w ?? 92)),
-      h: Math.min(70, Math.max(18, box.h ?? 38)),
+      x: Math.min(24, Math.max(0, L.x ?? 4)),
+      w: Math.min(100, Math.max(50, L.w ?? 92)),
+      fontScale: Math.min(1.6, Math.max(0.6, L.fontScale ?? 1)),
+      frameH: Math.min(65, Math.max(28, L.frameH ?? L.h ?? 42)),
     };
   }
 
-  function boxPx() {
-    const rect = els.box.getBoundingClientRect();
-    const vw = window.innerWidth;
+  function readingLinePx() {
+    const safe = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--safe-top") || "0"
+    );
     const vh = window.innerHeight;
-    return { x: rect.left, y: rect.top, w: rect.width, h: rect.height, vw, vh };
+    return (Number.isNaN(safe) ? 0 : safe) + vh * 0.16;
   }
 
-  function applyBoxDOM() {
-    const b = state.box;
-    els.box.style.top = "";
-    els.box.style.left = `${b.x}%`;
-    els.box.style.width = `${b.w}%`;
-    els.box.style.height = `${b.h}%`;
-  }
+  function applyLayout() {
+    const L = state.layout;
+    const root = els.stage;
+    root.style.setProperty("--text-left", `${L.x}%`);
+    root.style.setProperty("--text-width", `${L.w}%`);
+    root.style.setProperty("--frame-height", `${L.frameH}%`);
+    const fontSize = settings.fontSize * L.fontScale * 0.55;
+    els.text.style.fontSize = `${fontSize}px`;
+    els.text.style.lineHeight = `${(fontSize + settings.lineSpacing * L.fontScale * 0.35) / fontSize}`;
+    els.text.style.color = settings.textColor;
+    els.text.style.paddingLeft = els.text.style.paddingRight = `${settings.margin * L.fontScale * 0.25}px`;
+    els.text.style.transform = settings.mirror ? "scaleX(-1)" : "";
+    els.text.style.background = hexToRgba(settings.bgColor, 0.52);
 
-  function applyTextStyles() {
-    const t = els.text;
-    const scale = Math.min(1, state.box.w / 84);
-    const fontSize = settings.fontSize * scale * 0.45;
-    t.style.fontSize = `${fontSize}px`;
-    t.style.lineHeight = `${(fontSize + settings.lineSpacing * scale * 0.4) / fontSize}`;
-    t.style.color = settings.textColor;
-    t.style.paddingLeft = t.style.paddingRight = `${settings.margin * scale * 0.3}px`;
-    t.style.transform = settings.mirror ? "scaleX(-1)" : "";
-    els.box.style.background = hexToRgba(settings.bgColor, 0.82);
     els.readingLine.classList.toggle("hidden", !settings.guide);
+    updateSpacers();
+  }
+
+  function updateSpacers() {
+    const readY = readingLinePx();
+    els.spacerTop.style.height = `${readY}px`;
   }
 
   function hexToRgba(hex, a) {
@@ -87,16 +92,17 @@ export function createRecorder(deps) {
     return `rgba(${r},${g},${b},${a})`;
   }
 
-  function setOffset(y) {
-    const inner = els.scrollInner;
-    const max = Math.max(0, inner.scrollHeight - inner.clientHeight);
-    state.offset = Math.min(0, Math.max(-max, y));
-    els.text.style.transform = `translateY(${state.offset}px)`;
+  function columnHeight() {
+    return els.column.offsetHeight;
   }
 
   function maxScroll() {
-    const inner = els.scrollInner;
-    return Math.max(0, inner.scrollHeight - inner.clientHeight);
+    return Math.max(0, columnHeight() - window.innerHeight + readingLinePx() * 0.5);
+  }
+
+  function setOffset(y) {
+    state.offset = Math.min(0, Math.max(-maxScroll(), y));
+    els.column.style.transform = `translate3d(0, ${state.offset}px, 0)`;
   }
 
   function stopScroll() {
@@ -110,8 +116,11 @@ export function createRecorder(deps) {
     if (!state.playing) return;
     const speed = Number(els.speed.value) / 60;
     setOffset(state.offset - speed);
-    if (state.offset <= -maxScroll()) stopScroll();
-    else state.raf = requestAnimationFrame(scrollLoop);
+    if (state.offset <= -maxScroll()) {
+      stopScroll();
+      return;
+    }
+    state.raf = requestAnimationFrame(scrollLoop);
   }
 
   function startScroll() {
@@ -143,19 +152,14 @@ export function createRecorder(deps) {
 
   async function startCamera() {
     stopCamera();
-    const constraints = {
-      audio: true,
-      video: {
-        facingMode: state.facing,
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-      },
-    };
     try {
-      state.stream = await navigator.mediaDevices.getUserMedia(constraints);
-    } catch (err) {
-      alert("Camera access is required to record. Allow camera & mic in Settings → Safari.");
-      throw err;
+      state.stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: { facingMode: state.facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      });
+    } catch {
+      alert("Camera access is required. Allow camera & microphone in Settings → Safari.");
+      throw new Error("no camera");
     }
     els.video.srcObject = state.stream;
     await els.video.play();
@@ -167,14 +171,40 @@ export function createRecorder(deps) {
     els.video.srcObject = null;
   }
 
-  function pickMimeType() {
-    const candidates = [
-      "video/mp4",
-      "video/webm;codecs=vp9",
-      "video/webm;codecs=vp8",
-      "video/webm",
-    ];
-    return candidates.find((t) => MediaRecorder.isTypeSupported(t)) || "";
+  function layoutMetrics() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const L = state.layout;
+    const left = (L.x / 100) * vw;
+    const width = (L.w / 100) * vw;
+    const fontSize = settings.fontSize * L.fontScale * 0.55;
+    const lineH = fontSize + settings.lineSpacing * L.fontScale * 0.35;
+    const pad = settings.margin * L.fontScale * 0.25;
+    const readY = readingLinePx();
+    return { vw, vh, left, width, fontSize, lineH, pad, readY };
+  }
+
+  function drawWrappedText(ctx, text, x, y, maxW, lineH) {
+    const lines = text.split("\n");
+    let cy = y;
+    for (const line of lines) {
+      const words = line.split(" ");
+      let row = "";
+      for (const word of words) {
+        const test = row ? `${row} ${word}` : word;
+        if (ctx.measureText(test).width > maxW && row) {
+          ctx.fillText(row, x, cy);
+          cy += lineH;
+          row = word;
+        } else row = test;
+      }
+      if (row) {
+        ctx.fillText(row, x, cy);
+        cy += lineH;
+      }
+      cy += lineH * 0.12;
+    }
+    return cy;
   }
 
   function drawCompositeFrame() {
@@ -187,63 +217,50 @@ export function createRecorder(deps) {
 
     ctx.drawImage(v, 0, 0, w, h);
 
-    const b = boxPx();
-    const sx = w / b.vw;
-    const sy = h / b.vh;
-    const bx = b.x * sx;
-    const by = b.y * sy;
-    const bw = b.w * sx;
-    const bh = b.h * sy;
-
-    ctx.fillStyle = hexToRgba(settings.bgColor, 0.82);
-    ctx.fillRect(bx, by, bw, bh);
+    const m = layoutMetrics();
+    const sx = w / m.vw;
+    const sy = h / m.vh;
+    const left = m.left * sx;
+    const maxW = m.width * sx;
+    const fontSize = m.fontSize * sx;
+    const lineH = m.lineH * sx;
+    const pad = m.pad * sx;
+    const readY = m.readY * sy;
+    const scrollY = state.offset * sy;
 
     ctx.save();
     ctx.beginPath();
-    ctx.rect(bx, by, bw, bh);
+    ctx.rect(0, 0, w, h);
     ctx.clip();
 
-    const scale = Math.min(1, state.box.w / 84);
-    const fontSize = settings.fontSize * scale * 0.45 * (w / b.vw);
-    const lineH = fontSize + settings.lineSpacing * scale * 0.4 * (w / b.vw);
-    const pad = settings.margin * scale * 0.3 * (w / b.vw);
-    const lines = (state.script?.body || "").split("\n");
-    const readingY = by + bh * 0.72;
-
-    ctx.fillStyle = settings.textColor;
-    ctx.font = `500 ${fontSize}px -apple-system, sans-serif`;
+    ctx.font = `600 ${fontSize}px -apple-system, sans-serif`;
     ctx.textAlign = "left";
-    if (settings.mirror) {
-      ctx.translate(bx + bw, by);
-      ctx.scale(-1, 1);
-      ctx.translate(-bx - bw, 0);
-    }
+    ctx.fillStyle = settings.textColor;
 
-    let y = by + bh * 0.06 + state.offset * sy;
-    for (const line of lines) {
-      const words = line.split(" ");
-      let row = "";
-      for (const word of words) {
-        const test = row ? `${row} ${word}` : word;
-        if (ctx.measureText(test).width > bw - pad * 2 && row) {
-          ctx.fillText(row, bx + pad, y);
-          y += lineH;
-          row = word;
-        } else row = test;
-      }
-      if (row) {
-        ctx.fillText(row, bx + pad, y);
-        y += lineH;
-      }
-      y += lineH * 0.15;
+    const body = state.script?.body || "";
+    const startY = m.readY * sy + scrollY + fontSize;
+
+    if (settings.mirror) {
+      ctx.save();
+      ctx.translate(left + maxW, 0);
+      ctx.scale(-1, 1);
+      ctx.shadowColor = "rgba(0,0,0,0.9)";
+      ctx.shadowBlur = 8 * sx;
+      drawWrappedText(ctx, body, left + pad, startY, maxW - pad * 2, lineH);
+      ctx.restore();
+    } else {
+      ctx.shadowColor = "rgba(0,0,0,0.9)";
+      ctx.shadowBlur = 8 * sx;
+      drawWrappedText(ctx, body, left + pad, startY, maxW - pad * 2, lineH);
     }
 
     if (settings.guide) {
-      ctx.strokeStyle = "rgba(255, 159, 10, 0.5)";
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "rgba(255, 159, 10, 0.55)";
       ctx.lineWidth = 2 * sx;
       ctx.beginPath();
-      ctx.moveTo(bx, readingY);
-      ctx.lineTo(bx + bw, readingY);
+      ctx.moveTo(left, readY);
+      ctx.lineTo(left + maxW, readY);
       ctx.stroke();
     }
 
@@ -264,23 +281,22 @@ export function createRecorder(deps) {
     compositeRaf = null;
   }
 
+  function pickMimeType() {
+    return ["video/mp4", "video/webm;codecs=vp9", "video/webm"].find((t) =>
+      MediaRecorder.isTypeSupported(t)
+    );
+  }
+
   function startRecording() {
     if (state.recording) return;
     drawCompositeFrame();
     const mime = pickMimeType();
-    const canvasStream = els.canvas.captureStream(30);
-    const audioTrack = state.stream?.getAudioTracks()[0];
-    if (audioTrack) canvasStream.addTrack(audioTrack);
-
+    const stream = els.canvas.captureStream(30);
+    const audio = state.stream?.getAudioTracks()[0];
+    if (audio) stream.addTrack(audio);
     state.chunks = [];
-    try {
-      state.mediaRecorder = new MediaRecorder(canvasStream, mime ? { mimeType: mime } : undefined);
-    } catch {
-      state.mediaRecorder = new MediaRecorder(canvasStream);
-    }
-    state.mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size) state.chunks.push(e.data);
-    };
+    state.mediaRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    state.mediaRecorder.ondataavailable = (e) => e.data.size && state.chunks.push(e.data);
     state.mediaRecorder.onstop = saveRecording;
     state.mediaRecorder.start(1000);
     state.recording = true;
@@ -299,25 +315,20 @@ export function createRecorder(deps) {
   function saveRecording() {
     const type = state.mediaRecorder?.mimeType || "video/mp4";
     const blob = new Blob(state.chunks, { type });
-    const url = URL.createObjectURL(blob);
     const ext = type.includes("mp4") ? "mp4" : "webm";
     const name = `${state.script?.title || "recording"}-${Date.now()}.${ext}`;
-
-    if (navigator.share && navigator.canShare?.({ files: [new File([blob], name, { type })] })) {
-      const file = new File([blob], name, { type });
-      navigator.share({ files: [file], title: name }).catch(() => download(url, name));
-    } else {
-      download(url, name);
-    }
-    URL.revokeObjectURL(url);
+    const file = new File([blob], name, { type });
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      navigator.share({ files: [file], title: name }).catch(() => download(blob, name));
+    } else download(blob, name);
   }
 
-  function download(url, name) {
+  function download(blob, name) {
     const a = document.createElement("a");
-    a.href = url;
+    a.href = URL.createObjectURL(blob);
     a.download = name;
     a.click();
-    alert("Recording saved. Check Downloads or Files, or use Share to save to Photos.");
+    alert("Recording saved — use Share or Files to move it to Photos.");
   }
 
   async function open(script) {
@@ -325,13 +336,12 @@ export function createRecorder(deps) {
     state.offset = 0;
     state.playing = false;
     state.facing = "user";
-    state.box = normalizeBox(settings.prompterBox);
+    state.layout = normalizeLayout(settings.prompterBox);
     els.title.textContent = script.title;
     els.text.textContent = script.body;
     els.speed.value = settings.speed;
+    applyLayout();
     setOffset(0);
-    applyBoxDOM();
-    applyTextStyles();
 
     els.root.classList.remove("hidden");
     els.root.setAttribute("aria-hidden", "false");
@@ -339,6 +349,10 @@ export function createRecorder(deps) {
     try {
       await startCamera();
       startCompositeLoop();
+      requestAnimationFrame(() => {
+        updateSpacers();
+        setOffset(0);
+      });
       if ("wakeLock" in navigator) {
         try {
           state.wakeLock = await navigator.wakeLock.request("screen");
@@ -367,15 +381,13 @@ export function createRecorder(deps) {
     await startCamera();
   }
 
-  // Resize only — top stays anchored under the camera
-  function pointerBoxInteraction(e) {
+  function pointerLayoutInteraction(e) {
     const handle = e.target.closest("[data-handle]");
     if (!handle) return;
-
     e.preventDefault();
     const startX = e.clientX ?? e.touches?.[0]?.clientX;
     const startY = e.clientY ?? e.touches?.[0]?.clientY;
-    const startBox = { ...state.box };
+    const start = { ...state.layout };
     const mode = handle.dataset.handle;
 
     const onMove = (ev) => {
@@ -383,30 +395,21 @@ export function createRecorder(deps) {
       const cy = ev.clientY ?? ev.touches?.[0]?.clientY;
       const dx = ((cx - startX) / window.innerWidth) * 100;
       const dy = ((cy - startY) / window.innerHeight) * 100;
-      const b = { ...startBox };
-      const maxH = 72;
+      const L = { ...start };
 
-      if (mode.includes("e")) b.w = Math.min(100 - b.x, Math.max(40, startBox.w + dx));
-      if (mode.includes("s")) b.h = Math.min(maxH, Math.max(18, startBox.h + dy));
+      if (mode.includes("e")) L.w = Math.min(100 - L.x, Math.max(50, start.w + dx));
       if (mode.includes("w")) {
-        const nw = Math.max(40, startBox.w - dx);
-        b.x = Math.max(0, startBox.x + (startBox.w - nw));
-        b.w = nw;
-      }
-      if (mode.includes("sw")) {
-        const nw = Math.max(40, startBox.w - dx);
-        b.x = Math.max(0, startBox.x + (startBox.w - nw));
-        b.w = nw;
-        b.h = Math.min(maxH, Math.max(18, startBox.h + dy));
+        const nw = Math.max(50, start.w - dx);
+        L.x = Math.max(0, start.x + (start.w - nw));
+        L.w = nw;
       }
       if (mode.includes("se")) {
-        b.w = Math.min(100 - b.x, Math.max(40, startBox.w + dx));
-        b.h = Math.min(maxH, Math.max(18, startBox.h + dy));
+        L.fontScale = Math.min(1.6, Math.max(0.6, start.fontScale + dy * 0.02 + dx * 0.01));
+        L.frameH = Math.min(65, Math.max(28, start.frameH + dy * 0.5));
       }
 
-      state.box = normalizeBox(b);
-      applyBoxDOM();
-      applyTextStyles();
+      state.layout = normalizeLayout(L);
+      applyLayout();
     };
 
     const onEnd = () => {
@@ -414,7 +417,7 @@ export function createRecorder(deps) {
       window.removeEventListener("pointerup", onEnd);
       window.removeEventListener("touchmove", onMove);
       window.removeEventListener("touchend", onEnd);
-      settings.prompterBox = { ...normalizeBox(state.box) };
+      settings.prompterBox = { ...state.layout };
       deps.saveSettings();
     };
 
@@ -424,18 +427,18 @@ export function createRecorder(deps) {
     window.addEventListener("touchend", onEnd);
   }
 
-  els.box.addEventListener("pointerdown", pointerBoxInteraction);
-  els.box.addEventListener("touchstart", pointerBoxInteraction, { passive: false });
+  els.frame.addEventListener("pointerdown", pointerLayoutInteraction);
+  els.frame.addEventListener("touchstart", pointerLayoutInteraction, { passive: false });
 
-  els.scrollInner.addEventListener(
+  els.stage.addEventListener(
     "touchstart",
     (e) => {
-      if (state.playing) return;
+      if (state.playing || e.target.closest(".resize-handle")) return;
       state.scrollTouchY = e.touches[0].clientY;
     },
     { passive: true }
   );
-  els.scrollInner.addEventListener(
+  els.stage.addEventListener(
     "touchmove",
     (e) => {
       if (state.playing || state.scrollTouchY == null) return;
@@ -445,8 +448,14 @@ export function createRecorder(deps) {
     },
     { passive: true }
   );
-  els.scrollInner.addEventListener("touchend", () => {
+  els.stage.addEventListener("touchend", () => {
     state.scrollTouchY = null;
+  });
+
+  window.addEventListener("resize", () => {
+    if (!els.root.classList.contains("hidden")) {
+      updateSpacers();
+    }
   });
 
   els.btnClose.addEventListener("click", close);
@@ -462,18 +471,17 @@ export function createRecorder(deps) {
   });
   els.btnRecord.addEventListener("click", (e) => {
     e.stopPropagation();
-    if (state.recording) stopRecording();
-    else startRecording();
+    state.recording ? stopRecording() : startRecording();
   });
   els.speed.addEventListener("input", (e) => {
     settings.speed = Number(e.target.value);
-    deps.saveSettings?.();
+    deps.saveSettings();
   });
 
   els.root.addEventListener("click", (e) => {
-    if (e.target.closest(".rec-controls-bar, .prompter-box, .resize-handle")) return;
+    if (e.target.closest(".rec-controls-bar, .prompter-frame, .resize-handle, .scroll-column")) return;
     els.controls.classList.toggle("hidden-ui");
   });
 
-  return { open, close, applyTextStyles };
+  return { open, close };
 }

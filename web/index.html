@@ -115,18 +115,17 @@
     <video id="camera" class="camera-feed" playsinline autoplay muted></video>
     <canvas id="composite" class="composite-canvas" aria-hidden="true"></canvas>
 
-    <div id="prompter-box" class="prompter-box top-anchored">
-      <div class="box-top-label">Script · locked to top (near camera)</div>
-      <span class="resize-handle" data-handle="sw" aria-label="Resize"></span>
-      <span class="resize-handle grip" data-handle="se" aria-label="Resize"></span>
-      <span class="resize-handle" data-handle="s" aria-label="Resize height"></span>
-      <span class="resize-handle" data-handle="e" aria-label="Resize width"></span>
-      <span class="resize-handle" data-handle="w" aria-label="Resize width"></span>
-      <div id="rec-reading-line" class="reading-line box-line"></div>
-      <div id="box-scroll-inner" class="box-scroll-inner">
-        <div class="scroll-spacer top"></div>
+    <div id="scroll-stage" class="scroll-stage">
+      <div id="scroll-column" class="scroll-column">
+        <div id="scroll-spacer-top" class="scroll-spacer-top"></div>
         <div id="recorder-text" class="recorder-text"></div>
-        <div class="scroll-spacer bottom"></div>
+        <div id="scroll-spacer-bottom" class="scroll-spacer-bottom"></div>
+      </div>
+      <div id="rec-reading-line" class="reading-line-screen"></div>
+      <div id="prompter-frame" class="prompter-frame">
+        <span class="resize-handle grip" data-handle="se" aria-label="Text size"></span>
+        <span class="resize-handle" data-handle="e" aria-label="Width"></span>
+        <span class="resize-handle" data-handle="w" aria-label="Width"></span>
       </div>
     </div>
 
@@ -145,7 +144,7 @@
           <input type="range" id="rec-speed" min="10" max="120" value="42" />
         </label>
       </div>
-      <p class="rec-hint">Box stays under the camera · drag bottom/sides to resize · ● to record</p>
+      <p class="rec-hint">Script scrolls up and off the top · resize grip for text size · ● to record</p>
     </div>
   </div>
 

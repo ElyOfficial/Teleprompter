@@ -1,4 +1,4 @@
-const CACHE = "teleprompter-v4-top-anchor";
+const CACHE = "teleprompter-v5-scroll-top";
 const ASSETS = [
   "./",
   "./index.html",
