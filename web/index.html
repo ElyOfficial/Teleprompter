@@ -115,16 +115,13 @@
     <video id="camera" class="camera-feed" playsinline autoplay muted></video>
     <canvas id="composite" class="composite-canvas" aria-hidden="true"></canvas>
 
-    <div id="prompter-box" class="prompter-box">
-      <div class="box-drag-bar" title="Drag to move">⋯⋯</div>
-      <span class="resize-handle" data-handle="nw"></span>
-      <span class="resize-handle" data-handle="ne"></span>
-      <span class="resize-handle" data-handle="sw"></span>
-      <span class="resize-handle" data-handle="se"></span>
-      <span class="resize-handle" data-handle="n"></span>
-      <span class="resize-handle" data-handle="s"></span>
-      <span class="resize-handle" data-handle="e"></span>
-      <span class="resize-handle" data-handle="w"></span>
+    <div id="prompter-box" class="prompter-box top-anchored">
+      <div class="box-top-label">Script · locked to top (near camera)</div>
+      <span class="resize-handle" data-handle="sw" aria-label="Resize"></span>
+      <span class="resize-handle grip" data-handle="se" aria-label="Resize"></span>
+      <span class="resize-handle" data-handle="s" aria-label="Resize height"></span>
+      <span class="resize-handle" data-handle="e" aria-label="Resize width"></span>
+      <span class="resize-handle" data-handle="w" aria-label="Resize width"></span>
       <div id="rec-reading-line" class="reading-line box-line"></div>
       <div id="box-scroll-inner" class="box-scroll-inner">
         <div class="scroll-spacer top"></div>
@@ -148,7 +145,7 @@
           <input type="range" id="rec-speed" min="10" max="120" value="42" />
         </label>
       </div>
-      <p class="rec-hint">Drag box to move · corners to resize · ● to record</p>
+      <p class="rec-hint">Box stays under the camera · drag bottom/sides to resize · ● to record</p>
     </div>
   </div>
 

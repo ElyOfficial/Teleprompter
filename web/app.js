@@ -13,7 +13,7 @@ const DEFAULT_SETTINGS = {
   mirror: false,
   textColor: "#ffffff",
   bgColor: "#000000",
-  prompterBox: { x: 8, y: 18, w: 84, h: 52 },
+  prompterBox: { x: 4, w: 92, h: 38 },
 };
 
 let scripts = [];
@@ -291,7 +291,7 @@ $("#timer-start").addEventListener("click", () => {
 
 // --- Service worker + version ---
 
-const BUILD_ID = "camera-v3-2026-06-01";
+const BUILD_ID = "top-anchor-v4-2026-06-01";
 
 async function refreshAppCache() {
   if ("serviceWorker" in navigator) {
@@ -309,7 +309,7 @@ $("#btn-force-update")?.addEventListener("click", refreshAppCache);
 
 function showBuildTag() {
   const el = $("#build-tag");
-  if (el) el.textContent = `Build: ${BUILD_ID} (camera + record)`;
+  if (el) el.textContent = `Build: ${BUILD_ID} (top-anchored script)`;
 }
 
 if ("serviceWorker" in navigator) {

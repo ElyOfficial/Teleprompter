@@ -13,7 +13,7 @@ export function createRecorder(deps) {
     recording: false,
     mediaRecorder: null,
     chunks: [],
-    box: { x: 8, y: 18, w: 84, h: 52 },
+    box: { x: 4, w: 92, h: 38 },
     drag: null,
     scrollTouchY: null,
     wakeLock: null,
@@ -39,23 +39,27 @@ export function createRecorder(deps) {
 
   const ctx = els.canvas.getContext("2d");
 
+  /** Top edge is fixed under the camera; only width, horizontal inset, and height adjust. */
+  function normalizeBox(box) {
+    if (!box) return { x: 4, w: 92, h: 38 };
+    return {
+      x: Math.min(20, Math.max(0, box.x ?? 4)),
+      w: Math.min(100, Math.max(40, box.w ?? 92)),
+      h: Math.min(70, Math.max(18, box.h ?? 38)),
+    };
+  }
+
   function boxPx() {
+    const rect = els.box.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    return {
-      x: (state.box.x / 100) * vw,
-      y: (state.box.y / 100) * vh,
-      w: (state.box.w / 100) * vw,
-      h: (state.box.h / 100) * vh,
-      vw,
-      vh,
-    };
+    return { x: rect.left, y: rect.top, w: rect.width, h: rect.height, vw, vh };
   }
 
   function applyBoxDOM() {
     const b = state.box;
+    els.box.style.top = "";
     els.box.style.left = `${b.x}%`;
-    els.box.style.top = `${b.y}%`;
     els.box.style.width = `${b.w}%`;
     els.box.style.height = `${b.h}%`;
   }
@@ -204,7 +208,7 @@ export function createRecorder(deps) {
     const lineH = fontSize + settings.lineSpacing * scale * 0.4 * (w / b.vw);
     const pad = settings.margin * scale * 0.3 * (w / b.vw);
     const lines = (state.script?.body || "").split("\n");
-    const readingY = by + bh * 0.38;
+    const readingY = by + bh * 0.72;
 
     ctx.fillStyle = settings.textColor;
     ctx.font = `500 ${fontSize}px -apple-system, sans-serif`;
@@ -215,7 +219,7 @@ export function createRecorder(deps) {
       ctx.translate(-bx - bw, 0);
     }
 
-    let y = by + bh * 0.12 + state.offset * sy;
+    let y = by + bh * 0.06 + state.offset * sy;
     for (const line of lines) {
       const words = line.split(" ");
       let row = "";
@@ -321,7 +325,7 @@ export function createRecorder(deps) {
     state.offset = 0;
     state.playing = false;
     state.facing = "user";
-    if (settings.prompterBox) state.box = { ...settings.prompterBox };
+    state.box = normalizeBox(settings.prompterBox);
     els.title.textContent = script.title;
     els.text.textContent = script.body;
     els.speed.value = settings.speed;
@@ -363,17 +367,16 @@ export function createRecorder(deps) {
     await startCamera();
   }
 
-  // Resize / drag box
+  // Resize only — top stays anchored under the camera
   function pointerBoxInteraction(e) {
     const handle = e.target.closest("[data-handle]");
-    const dragBar = e.target.closest(".box-drag-bar");
-    if (!handle && !dragBar) return;
+    if (!handle) return;
 
     e.preventDefault();
     const startX = e.clientX ?? e.touches?.[0]?.clientX;
     const startY = e.clientY ?? e.touches?.[0]?.clientY;
     const startBox = { ...state.box };
-    const mode = handle?.dataset.handle || "move";
+    const mode = handle.dataset.handle;
 
     const onMove = (ev) => {
       const cx = ev.clientX ?? ev.touches?.[0]?.clientX;
@@ -381,25 +384,27 @@ export function createRecorder(deps) {
       const dx = ((cx - startX) / window.innerWidth) * 100;
       const dy = ((cy - startY) / window.innerHeight) * 100;
       const b = { ...startBox };
+      const maxH = 72;
 
-      if (mode === "move") {
-        b.x = Math.min(90, Math.max(0, startBox.x + dx));
-        b.y = Math.min(85, Math.max(5, startBox.y + dy));
-      } else {
-        if (mode.includes("e")) b.w = Math.min(100 - b.x, Math.max(30, startBox.w + dx));
-        if (mode.includes("s")) b.h = Math.min(100 - b.y, Math.max(20, startBox.h + dy));
-        if (mode.includes("w")) {
-          const nw = Math.max(30, startBox.w - dx);
-          b.x = Math.max(0, startBox.x + (startBox.w - nw));
-          b.w = nw;
-        }
-        if (mode.includes("n")) {
-          const nh = Math.max(20, startBox.h - dy);
-          b.y = Math.max(5, startBox.y + (startBox.h - nh));
-          b.h = nh;
-        }
+      if (mode.includes("e")) b.w = Math.min(100 - b.x, Math.max(40, startBox.w + dx));
+      if (mode.includes("s")) b.h = Math.min(maxH, Math.max(18, startBox.h + dy));
+      if (mode.includes("w")) {
+        const nw = Math.max(40, startBox.w - dx);
+        b.x = Math.max(0, startBox.x + (startBox.w - nw));
+        b.w = nw;
       }
-      state.box = b;
+      if (mode.includes("sw")) {
+        const nw = Math.max(40, startBox.w - dx);
+        b.x = Math.max(0, startBox.x + (startBox.w - nw));
+        b.w = nw;
+        b.h = Math.min(maxH, Math.max(18, startBox.h + dy));
+      }
+      if (mode.includes("se")) {
+        b.w = Math.min(100 - b.x, Math.max(40, startBox.w + dx));
+        b.h = Math.min(maxH, Math.max(18, startBox.h + dy));
+      }
+
+      state.box = normalizeBox(b);
       applyBoxDOM();
       applyTextStyles();
     };
@@ -409,7 +414,7 @@ export function createRecorder(deps) {
       window.removeEventListener("pointerup", onEnd);
       window.removeEventListener("touchmove", onMove);
       window.removeEventListener("touchend", onEnd);
-      settings.prompterBox = { ...state.box };
+      settings.prompterBox = { ...normalizeBox(state.box) };
       deps.saveSettings();
     };
 

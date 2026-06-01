@@ -282,26 +282,33 @@ html, body {
   pointer-events: none;
 }
 
-.prompter-box {
+.prompter-box.top-anchored {
   position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 6px);
+  left: 4%;
+  width: 92%;
+  height: 38%;
   z-index: 3;
-  border: 2px solid rgba(255, 159, 10, 0.65);
-  border-radius: 12px;
+  border: 2px solid rgba(255, 159, 10, 0.75);
+  border-radius: 14px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
 }
-.box-drag-bar {
+.box-top-label {
   flex-shrink: 0;
   text-align: center;
-  padding: 6px;
-  font-size: 0.75rem;
-  letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(0, 0, 0, 0.35);
-  cursor: grab;
-  touch-action: none;
+  padding: 5px 8px;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 159, 10, 0.9);
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 159, 10, 0.25);
+  pointer-events: none;
 }
 .box-scroll-inner {
   flex: 1;
@@ -314,35 +321,88 @@ html, body {
   font-weight: 500;
   will-change: transform;
 }
-.scroll-spacer.top { height: 28%; min-height: 40px; }
-.scroll-spacer.bottom { height: 40%; min-height: 60px; }
+/* Reading line near bottom of box — eyes stay up toward the camera */
+.scroll-spacer.top { height: 8%; min-height: 12px; }
+.scroll-spacer.bottom { height: 55%; min-height: 48px; }
 
 .reading-line.box-line {
   position: absolute;
-  left: 8px;
-  right: 8px;
-  top: 38%;
+  left: 10px;
+  right: 10px;
+  top: 72%;
   height: 2px;
-  background: rgba(255, 159, 10, 0.45);
+  background: rgba(255, 159, 10, 0.55);
   pointer-events: none;
   z-index: 2;
+  box-shadow: 0 0 8px rgba(255, 159, 10, 0.35);
 }
+.reading-line.box-line::before,
+.reading-line.box-line::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.reading-line.box-line::before { left: 0; }
+.reading-line.box-line::after { right: 0; }
 
 .resize-handle {
   position: absolute;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   z-index: 5;
   touch-action: none;
 }
-.resize-handle[data-handle="nw"] { top: -8px; left: -8px; cursor: nwse-resize; }
-.resize-handle[data-handle="ne"] { top: -8px; right: -8px; cursor: nesw-resize; }
-.resize-handle[data-handle="sw"] { bottom: -8px; left: -8px; cursor: nesw-resize; }
-.resize-handle[data-handle="se"] { bottom: -8px; right: -8px; cursor: nwse-resize; }
-.resize-handle[data-handle="n"] { top: -10px; left: 30%; right: 30%; width: auto; height: 20px; cursor: ns-resize; }
-.resize-handle[data-handle="s"] { bottom: -10px; left: 30%; right: 30%; width: auto; height: 20px; cursor: ns-resize; }
-.resize-handle[data-handle="e"] { right: -10px; top: 30%; bottom: 30%; width: 20px; height: auto; cursor: ew-resize; }
-.resize-handle[data-handle="w"] { left: -10px; top: 30%; bottom: 30%; width: 20px; height: auto; cursor: ew-resize; }
+.resize-handle[data-handle="sw"] { bottom: -6px; left: -6px; cursor: nesw-resize; }
+.resize-handle[data-handle="se"],
+.resize-handle.grip {
+  bottom: 4px;
+  right: 4px;
+  width: 36px;
+  height: 36px;
+  cursor: nwse-resize;
+  background: rgba(255, 159, 10, 0.35);
+  border-radius: 8px;
+  border: 2px solid var(--accent);
+}
+.resize-handle[data-handle="se"]::after,
+.resize-handle.grip::after {
+  content: "⤡";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--accent);
+}
+.resize-handle[data-handle="s"] {
+  bottom: -12px;
+  left: 25%;
+  right: 25%;
+  width: auto;
+  height: 28px;
+  cursor: ns-resize;
+}
+.resize-handle[data-handle="e"] {
+  right: -12px;
+  top: 35%;
+  bottom: 20%;
+  width: 24px;
+  height: auto;
+  cursor: ew-resize;
+}
+.resize-handle[data-handle="w"] {
+  left: -12px;
+  top: 35%;
+  bottom: 20%;
+  width: 24px;
+  height: auto;
+  cursor: ew-resize;
+}
 
 .countdown {
   position: absolute;
