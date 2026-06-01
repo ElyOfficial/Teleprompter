@@ -21,7 +21,9 @@ This installs like an app from Safari. No Xcode, no AltStore.
 3. Tap **Add to Home Screen**.
 4. Tap **Add**.
 
-Open **Teleprompter** from your home screen. It runs full screen, offline-capable, with scripts + scroll + timer + settings.
+Open **Teleprompter** from your home screen. Tap **Play** on a script to open the **camera** with a resizable script box, flip front/back camera, scroll while recording, and tap **●** to save the video.
+
+**After updating:** delete the old home-screen icon and add it again, or in Safari hold refresh to clear cache so you get the camera version.
 
 ### Tips
 

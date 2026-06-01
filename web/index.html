@@ -105,27 +105,45 @@
   </nav>
   </div>
 
-  <!-- Fullscreen player -->
-  <div id="player" class="player hidden" aria-hidden="true">
-    <div class="player-bg" id="player-bg"></div>
-    <div class="reading-line" id="reading-line"></div>
-    <div class="scroll-wrap" id="scroll-wrap">
-      <div class="scroll-spacer top"></div>
-      <div id="player-text" class="player-text"></div>
-      <div class="scroll-spacer bottom"></div>
-    </div>
-    <div id="countdown" class="countdown hidden"></div>
-    <div id="player-controls" class="player-controls">
-      <button type="button" class="icon-btn" id="btn-close-player" aria-label="Close">✕</button>
-      <h2 id="player-title"></h2>
-      <div class="player-transport">
-        <button type="button" id="btn-nudge-down" aria-label="Scroll down">↓</button>
-        <button type="button" id="btn-play" aria-label="Play">▶</button>
-        <button type="button" id="btn-nudge-up" aria-label="Scroll up">↑</button>
+  <!-- Camera + teleprompter recorder -->
+  <div id="recorder" class="recorder hidden" aria-hidden="true">
+    <video id="camera" class="camera-feed" playsinline autoplay muted></video>
+    <canvas id="composite" class="composite-canvas" aria-hidden="true"></canvas>
+
+    <div id="prompter-box" class="prompter-box">
+      <div class="box-drag-bar" title="Drag to move">⋯⋯</div>
+      <span class="resize-handle" data-handle="nw"></span>
+      <span class="resize-handle" data-handle="ne"></span>
+      <span class="resize-handle" data-handle="sw"></span>
+      <span class="resize-handle" data-handle="se"></span>
+      <span class="resize-handle" data-handle="n"></span>
+      <span class="resize-handle" data-handle="s"></span>
+      <span class="resize-handle" data-handle="e"></span>
+      <span class="resize-handle" data-handle="w"></span>
+      <div id="rec-reading-line" class="reading-line box-line"></div>
+      <div id="box-scroll-inner" class="box-scroll-inner">
+        <div class="scroll-spacer top"></div>
+        <div id="recorder-text" class="recorder-text"></div>
+        <div class="scroll-spacer bottom"></div>
       </div>
-      <label class="speed-row">Speed
-        <input type="range" id="player-speed" min="10" max="120" value="42" />
-      </label>
+    </div>
+
+    <div id="countdown" class="countdown hidden"></div>
+
+    <div id="recorder-controls" class="recorder-controls">
+      <div class="rec-top-bar">
+        <button type="button" class="icon-btn light" id="btn-close-recorder" aria-label="Close">✕</button>
+        <h2 id="recorder-title"></h2>
+        <button type="button" class="icon-btn light" id="btn-flip-camera" aria-label="Flip camera">⟳</button>
+      </div>
+      <div class="rec-controls-bar">
+        <button type="button" class="rec-btn" id="btn-rec-play" aria-label="Scroll">▶</button>
+        <button type="button" class="rec-btn record" id="btn-rec-record" aria-label="Record">●</button>
+        <label class="speed-row compact">Speed
+          <input type="range" id="rec-speed" min="10" max="120" value="42" />
+        </label>
+      </div>
+      <p class="rec-hint">Drag box to move · corners to resize · ● to record</p>
     </div>
   </div>
 

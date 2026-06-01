@@ -1,8 +1,9 @@
-const CACHE = "teleprompter-v1";
+const CACHE = "teleprompter-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./app.js",
+  "./recorder.js",
   "./styles.css",
   "./manifest.json",
   "./icons/icon-192.png",
