@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
+  <title>Teleprompter</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+  <header class="top-bar" id="top-bar">
+    <h1 id="screen-title">Scripts</h1>
+    <button type="button" class="icon-btn" id="header-action" hidden aria-label="Add">+</button>
+  </header>
+
+  <main id="main">
+    <!-- Scripts -->
+    <section id="view-scripts" class="view active">
+      <input type="search" id="search" class="search" placeholder="Search" autocomplete="off" />
+      <div id="script-grid" class="script-grid"></div>
+      <p id="empty-scripts" class="empty hidden">No scripts yet. Tap + to create one.</p>
+    </section>
+
+    <!-- Editor -->
+    <section id="view-editor" class="view">
+      <input type="text" id="editor-title" class="editor-title" placeholder="Title" />
+      <textarea id="editor-body" class="editor-body" placeholder="Write your script…"></textarea>
+      <div class="editor-actions">
+        <button type="button" class="btn secondary" id="btn-cancel-edit">Cancel</button>
+        <button type="button" class="btn primary" id="btn-save-edit">Save</button>
+      </div>
+    </section>
+
+    <!-- Timer -->
+    <section id="view-timer" class="view">
+      <div class="timer-mode">
+        <button type="button" class="seg active" data-mode="countdown">Countdown</button>
+        <button type="button" class="seg" data-mode="stopwatch">Stopwatch</button>
+      </div>
+      <div id="timer-pickers" class="timer-pickers">
+        <label>Min <input type="number" id="timer-min" min="0" max="120" value="5" /></label>
+        <label>Sec <input type="number" id="timer-sec" min="0" max="59" value="0" /></label>
+      </div>
+      <div id="timer-display" class="timer-display">05:00.0</div>
+      <div class="timer-buttons">
+        <button type="button" class="btn secondary" id="timer-reset">Reset</button>
+        <button type="button" class="btn primary" id="timer-start">Start</button>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="view-settings" class="view">
+      <div class="settings-group">
+        <h2>TEXT</h2>
+        <label class="row">Font size <span id="val-font">52</span>
+          <input type="range" id="set-font" min="24" max="96" value="52" />
+        </label>
+        <label class="row">Line spacing <span id="val-line">12</span>
+          <input type="range" id="set-line" min="0" max="32" value="12" />
+        </label>
+        <label class="row">Side margin <span id="val-margin">28</span>
+          <input type="range" id="set-margin" min="0" max="80" value="28" />
+        </label>
+      </div>
+      <div class="settings-group">
+        <h2>PLAYBACK</h2>
+        <label class="row">Scroll speed <span id="val-speed">42</span>
+          <input type="range" id="set-speed" min="10" max="120" value="42" />
+        </label>
+        <label class="row">Countdown (sec)
+          <input type="number" id="set-countdown" min="0" max="10" value="3" />
+        </label>
+        <label class="row toggle-row">
+          <span>Reading line</span>
+          <input type="checkbox" id="set-guide" checked />
+        </label>
+        <label class="row toggle-row">
+          <span>Mirror (glass prompter)</span>
+          <input type="checkbox" id="set-mirror" />
+        </label>
+      </div>
+      <div class="settings-group">
+        <h2>COLOR</h2>
+        <label class="row">Text <input type="color" id="set-text-color" value="#ffffff" /></label>
+        <label class="row">Background <input type="color" id="set-bg-color" value="#000000" /></label>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tab-bar" id="tab-bar">
+    <button type="button" class="tab active" data-tab="scripts">
+      <span class="tab-icon">📄</span><span>Scripts</span>
+    </button>
+    <button type="button" class="tab" data-tab="timer">
+      <span class="tab-icon">⏱</span><span>Timer</span>
+    </button>
+    <button type="button" class="tab" data-tab="settings">
+      <span class="tab-icon">⚙️</span><span>Settings</span>
+    </button>
+  </nav>
+  </div>
+
+  <!-- Fullscreen player -->
+  <div id="player" class="player hidden" aria-hidden="true">
+    <div class="player-bg" id="player-bg"></div>
+    <div class="reading-line" id="reading-line"></div>
+    <div class="scroll-wrap" id="scroll-wrap">
+      <div class="scroll-spacer top"></div>
+      <div id="player-text" class="player-text"></div>
+      <div class="scroll-spacer bottom"></div>
+    </div>
+    <div id="countdown" class="countdown hidden"></div>
+    <div id="player-controls" class="player-controls">
+      <button type="button" class="icon-btn" id="btn-close-player" aria-label="Close">✕</button>
+      <h2 id="player-title"></h2>
+      <div class="player-transport">
+        <button type="button" id="btn-nudge-down" aria-label="Scroll down">↓</button>
+        <button type="button" id="btn-play" aria-label="Play">▶</button>
+        <button type="button" id="btn-nudge-up" aria-label="Scroll up">↑</button>
+      </div>
+      <label class="speed-row">Speed
+        <input type="range" id="player-speed" min="10" max="120" value="42" />
+      </label>
+    </div>
+  </div>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
