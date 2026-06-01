@@ -8,11 +8,11 @@ You have **two options**. The web app is ready now; the native app needs Xcode l
 
 This installs like an app from Safari. No Xcode, no AltStore.
 
-### 1. Wait for the deploy (or use the link below)
+### 1. Open this link on your iPhone
 
-After the latest push, GitHub Actions deploys the `web/` folder.  
-Open: **https://elyofficial.github.io/Teleprompter/**  
-(if that 404s, check **Actions** on GitHub until the workflow is green, then retry)
+**https://elyofficial.github.io/Teleprompter/**
+
+(Deployed automatically from the `web/` folder in this repo.)
 
 ### 2. On your iPhone
 
